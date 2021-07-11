@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Login{% endblock %}
+
+{% block content %}
+<style>
+    .errorlist {
+        color: red;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <h3>Customer Login Form</h3>
+            <hr>
+            <form action="" method="POST">
+                {% csrf_token %}
+                {{form.as_p}}
+                <button class="btn btn-primary">Login as a Customer</button>
+                {% if error %}
+                <li style="color: red;">{{error}}</li>
+                {% endif %}
+            </form>
+            <p>Forgot Password?<a href="{% url 'ecomapp:passworforgot' %}">Reset now.</a></p>
+            <p> or dont have account? <a href="{% url 'ecomapp:customerregistration' %}{% if request.GET.next %}?next={{request.GET.next}}{% endif %}">Register here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% comment %} if we go to checkout without authentication it will redirect to login and if sucess we can go to checkout , but we can go to registration page from login page so we have to pass next url in registration view also after registration is succed it will redirect to that next url  {% endcomment %}
