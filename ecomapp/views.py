@@ -1,3 +1,4 @@
+from django.http.response import HttpResponse
 from django.views.generic import View, TemplateView, CreateView, FormView, DetailView, ListView
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
@@ -11,6 +12,8 @@ from django.db.models import Q
 from .models import *
 from .forms import *
 import requests
+from xhtml2pdf import pisa
+from django.template.loader import get_template
 
 
 class EcomMixin(object):
@@ -24,11 +27,6 @@ class EcomMixin(object):
                 cart_obj.customer = request.user.customer
                 cart_obj.save()
         return super().dispatch(request, *args, **kwargs)
-
-
-
-
-
 
 
 
@@ -278,6 +276,32 @@ class KhaltiVerifyView(View):
             "success": success
         }
         return JsonResponse(data)
+
+    
+def render_pdf_view(request):
+
+    o_id = request.GET.get('o_id')
+    odr_obj =Order.objects.get(id= o_id )
+    #orderplaced = OrderPlaced.objects.filter(customer=customer)
+    
+  
+    template_path = 'bill.html'
+    context = {'order': odr_obj}
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="PayementBill.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response)
+    # if error then show some funy view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
 # payment gateway button provide diaglogboxx for login with khalti accoutn and if credentital are right(success) then it will cut the amount and return token, amount and other data in json format , after that server side verifcation is done by passing these obtained token to the khalti server 
 class CustomerRegistrationView(CreateView):
 
@@ -348,6 +372,7 @@ class CustomerProfileView(TemplateView):
 
 
     def dispatch(self, request, *args, **kwargs):
+        # user is authenticated and user has customer
         if request.user.is_authenticated and request.user.customer:
             pass
         else:
@@ -446,6 +471,9 @@ class PasswordResetView(FormView):
 
 
 
+
+
+
 # Admin parts
 class AdminLoginView(FormView):
     template_name="adminpages/adminlogin.html"
@@ -468,9 +496,9 @@ class AdminLoginView(FormView):
 
 class AdminRequiredMixin(object):
      def dispatch(self, request, *args, **kwargs):
+         # if used is authenticated and user is admin
         if request.user.is_authenticated and Admin.objects.filter(user=request.user).exists:
-            #the order of other customer is restricted, current customer and the customer of that order is checked
-           pass
+            pass
         else:
             return redirect("/admin-login/")
         return super().dispatch(request, *args, **kwargs)
@@ -548,3 +576,18 @@ class AdminProductCreateView(AdminRequiredMixin,CreateView):
             ProductImage.objects.create(product=p, image=i)
 
         return super().form_valid(form)
+
+class AdminProfile(AdminRequiredMixin, TemplateView):
+    template_name ="adminpages/adminprofile.html"
+
+    def get_context_data(self, **kwargs):
+        user = self.request.user
+        context = super().get_context_data(**kwargs)
+        context['profile']=Admin.objects.get(user=user)
+        return context
+
+class AdminLogout(AdminRequiredMixin,View):
+    def get(self, request):
+        
+        logout(request)
+        return redirect('ecomapp:adminlogin')

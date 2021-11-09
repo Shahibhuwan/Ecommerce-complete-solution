@@ -1,0 +1,14 @@
+{% extends 'adminpages/adminbase.html' %}
+{% block title %}Profile{% endblock %}
+{% block content%}
+<div class="container">
+<table>
+<tr>
+<td colspan="4" class ="text-right"><img src="{{profile.image.url}}" style="height: 100px;" alt=""></td></tr>
+<tr><td>{{profile.full_name}}</td></tr>
+<tr><td>{{profile.user.email}}</td></tr>
+<tr><td>{{profile.mobile}}</td>
+</tr>
+</table>
+</div>
+{% endblock%}

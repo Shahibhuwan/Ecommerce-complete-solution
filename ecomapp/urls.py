@@ -18,6 +18,7 @@ urlpatterns = [
     path("profile/", CustomerProfileView.as_view(), name="customerprofile"),
     path("profile/order<int:pk>/", CustomerOrderDetailView.as_view(), name="customerorderdetail"),
     path("admin-login/", AdminLoginView.as_view(), name="adminlogin"),
+    path("admin-logout/", AdminLogout.as_view(), name="adminlogout"),
     path("admin-home/", AdminHomeView.as_view(), name="adminhome"),
     path("admin-order/<int:pk>/",AdminOrderDetailView.as_view(),name="adminorderdetail"),
     path("admin-all-orders/", AdminOrderListView.as_view(), name="adminorderlist"),
@@ -30,7 +31,8 @@ urlpatterns = [
     path("admin-product/list/",AdminProductListView.as_view(),name="adminproductlist"),
     path("admin-product/add/", AdminProductCreateView.as_view(), name="adminproductcreate"),
     path("forgot-password/", PasswordForgotView.as_view(), name="passworforgot"),
-    path("password-reset/<email>/<token>/",
-         PasswordResetView.as_view(), name="passwordreset"),
+    path("password-reset/<email>/<token>/", PasswordResetView.as_view(), name="passwordreset"),
+    path("rendertopdf/",render_pdf_view ,name="rendertopdf"),
+    path("adminprofile/",AdminProfile.as_view(), name="adminprofile"),
 
     ]
